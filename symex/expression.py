@@ -53,7 +53,10 @@ def parseValue(ast: Dict, s: Solver, env: Environment):
               "Scalar_DNumber", lambda x: float)
     return t(ast["value"])
 
-
+def constFetch(ast: Dict, s: Solver, env: Environment):
+    consts = {"True": True,
+              "False": False}
+    return consts[ast["name"]["parts"][0]]
 
 def varAssign(ast: Dict, s: Solver, env: Environment):
     try:
