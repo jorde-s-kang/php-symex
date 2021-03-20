@@ -7,7 +7,7 @@ from pampy import match, _
 from symex.Exceptions import ExpressionError
 import symex.datatypes as dt
 
-def evalExpression(exp: Dict, s: Solver, env: Environment) -> ExprRef:
+def evalExpression(exp: Dict, env: Environment) -> ExprRef:
     e = None
     try:
         if exp["nodeType"] != "Expr_Assign":
@@ -27,25 +27,25 @@ def evalExpression(exp: Dict, s: Solver, env: Environment) -> ExprRef:
                "Expr_ArrayDimFetch",            lambda x: arrayFetch,
                "Expr_ConstFetch",               lambda x: constFetch
     )
-    return fn(e, s, env)
+    return fn(e, env)
 
 
-def funcCall(ast: Dict, s:Solver, env: Environment):
-    args: List = [evalExpression(arg["value"], s, env) for arg in ast["args"]]
-    fn: Callable = lookup.get_fn(ast["name"]["parts"][0], s)
+def funcCall(ast: Dict, env: Environment):
+    args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
+    fn: Callable = lookup.get_fn(ast["name"]["parts"][0])
     return fn(*args)
 
 
-def binop(ast: Dict, s: Solver, env: Environment) -> Callable:
+def binop(ast: Dict, env: Environment) -> Callable:
     op: Callable = lookup.get_binop(ast["nodeType"])
-    def binaryOperator(ast: Dict, s: Solver, env: Environment):
-        left  = evalExpression(ast["left"], s, env)
-        right = evalExpression(ast["right"], s, env)
+    def binaryOperator(ast: Dict, env: Environment):
+        left  = evalExpression(ast["left"], env)
+        right = evalExpression(ast["right"], env)
         return op(left, right)
-    return binaryOperator(ast, s, env)
+    return binaryOperator(ast, env)
 
 
-def parseValue(ast: Dict, s: Solver, env: Environment):
+def parseValue(ast: Dict, env: Environment):
     t = match(ast["nodeType"],
               "Scalar_LNumber", lambda x: int,
               "Boolean", lambda x: bool,
@@ -53,41 +53,39 @@ def parseValue(ast: Dict, s: Solver, env: Environment):
               "Scalar_DNumber", lambda x: float)
     return t(ast["value"])
 
-def constFetch(ast: Dict, s: Solver, env: Environment):
+def constFetch(ast: Dict, env: Environment):
     consts = {"True": True,
               "False": False}
     return consts[ast["name"]["parts"][0]]
 
-def varAssign(ast: Dict, s: Solver, env: Environment):
+def varAssign(ast: Dict, env: Environment):
     try:
-        var = evalExpression(ast["var"], s, env)
-        val = evalExpression(ast["expr"], s, env)
+        var = evalExpression(ast["var"], env)
+        val = evalExpression(ast["expr"], env)
     except KeyError:
         raise ExpressionError(ast, env)
     if type(val).__bases__[0] == ExprRef:
-        print(val)
         env.symenv.define(var, val)
-    print(s)
     env.define(var, val)
 
-def varLookup(ast: Dict, s: Solver, env: Environment):
+def varLookup(ast: Dict, env: Environment):
     var = ast["name"]
     val = env.lookup(var)
     return val
 
-def array(ast: Dict, s: Solver, env: Environment):
+def array(ast: Dict, env: Environment):
     items = dict()
     c = 0
     for i in ast["items"]:
-        val = evalExpression(i["value"], s, env)
+        val = evalExpression(i["value"], env)
         if i["key"] is not None:
-            items[evalExpression(i["key"], s, env)] = val
+            items[evalExpression(i["key"], env)] = val
         else:
             items[c] = val
             c += 1
     return items
 
-def arrayFetch(ast: Dict, s: Solver, env: Environment):
-    arr = evalExpression(ast["var"], s, env)
-    ind = evalExpression(ast["dim"], s, env)
+def arrayFetch(ast: Dict, env: Environment):
+    arr = evalExpression(ast["var"], env)
+    ind = evalExpression(ast["dim"], env)
     return arr[ind]

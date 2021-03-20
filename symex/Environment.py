@@ -1,3 +1,4 @@
+import copy
 from symex.SymbolicEnvironment import SymbolicEnvironment
 
 class Environment:
@@ -28,6 +29,9 @@ class Environment:
         except KeyError:
             return False
 
+    def fork(self):
+        return Environment(self)
+        
     def define(self, key: str, val: object, sym=False):
         found = False
         curr = self

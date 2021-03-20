@@ -31,6 +31,7 @@ def get_binop(op: str) -> Callable:
             "Div": lambda a, b: a / b,
             "Mod": lambda a, b: a % b,
             "Equal": lambda a, b: a == b,
+            "NotEqual": lambda a, b: a != b,            
             "Smaller": lambda a, b: a < b,
             "SmallerOrEqual": lambda a, b: a <= b,
             "Greater": lambda a, b: a > b,

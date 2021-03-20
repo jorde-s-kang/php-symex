@@ -5,16 +5,16 @@ import symex.evaluation as e
 from symex.expression import evalExpression
 
 
-def evalWhile(ast: Dict, s: Solver, env: Environment):
+def evalWhile(ast: Dict, env: Environment):
     en = Environment(env)
-    so = Solver()
+    s = Solver()
     c = ast["cond"]
     so.add(evalExpression(c, so, env))
     while so.check() == sat:
         print(so)
-        e.phpEvalAst(ast["stmts"], so, en)
+        e.phpEvalAst(ast["stmts"], en)
         so = Solver()
-        so.add(evalExpression(c, so, en))
+        so.add(evalExpression(c, en))
 
 
 def evalFor(ast: Dict, s: Solver, env: Environment):

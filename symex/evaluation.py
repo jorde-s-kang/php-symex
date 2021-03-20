@@ -16,11 +16,13 @@ def phpEvalInline(data: str, getVars: Dict = {}, postVars: Dict = {}, constraint
     data: A PHP string beginning '<?php'
     """
     p = Parser()
-    s = Solver()
     env = Environment()
-    
+    env.define("_GET", getVars)
+    env.define("_POST", postVars)    
+    for c in constraints:
+        env.symenv.constraints.add(c)
     ast = p.parse_inline(data)
-    return phpEvalAst(ast, s, env, getVars, postVars, constraints)
+    return phpEvalAst(ast, env)
 
 
 def phpEvalFile(fname: str, getVars: Dict = {}, postVars: Dict = {}, constraints = []):
@@ -30,26 +32,23 @@ def phpEvalFile(fname: str, getVars: Dict = {}, postVars: Dict = {}, constraints
     fname: The name of the file 
     """
     p: Parser = Parser()
-    s: Solver = Solver()
     env: Environment = Environment()
+    env.define("_GET", getVars)
+    env.define("_POST", postVars)
     ast: List = p.parse_file(fname)
-    return phpEvalAst(ast, s, env, getVars, postVars, constraints)
+    return phpEvalAst(ast, env)
 
 
-def phpEvalAst(ast: List[Dict], s: Solver, env: Environment, getVars, postVars, constraints):
+def phpEvalAst(ast: List[Dict], env: Environment):
     """
     Evaluates the output of Phpparser.parse()
     """
-    env.define("_GET", getVars)
-    env.define("_POST", postVars)
-    for c in constraints:
-        env.symenv.constraints.add(c)
     for stmt in ast:
-        phpEval(stmt, s, env)
+        phpEval(stmt, env)
     return env
 
 
-def phpEval(ast: Dict, s: Solver, env: Environment) -> ExprRef:
+def phpEval(ast: Dict, env: Environment) -> ExprRef:
     fn = match(ast,
                {'nodeType': 'Stmt_Expression'}, lambda x: expr.evalExpression,
                {'nodeType': 'Stmt_Echo'},       lambda x: phpEvalEcho,
@@ -60,9 +59,9 @@ def phpEval(ast: Dict, s: Solver, env: Environment) -> ExprRef:
                {'nodeType': 'Stmt_For'},        lambda x: loop.evalFor,
                {'nodeType': 'Stmt_Foreach'},    lambda x: loop.evalForEach
                )
-    return fn(ast, s, env)
+    return fn(ast, env)
 
 
-def phpEvalEcho(ast: Dict, s: Solver, env: Environment):
-    exprs = [expr.evalExpression(ast, s, env) for ast in ast["exprs"]]
+def phpEvalEcho(ast: Dict, env: Environment):
+    exprs = [expr.evalExpression(ast, env) for ast in ast["exprs"]]
     print(*exprs)

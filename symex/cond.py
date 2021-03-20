@@ -6,28 +6,34 @@ import copy
 from typing import Dict
 
 
-def evalIf(ast: Dict, s: Solver, env: Environment) -> ExprRef:
-    c: ExprRef = evalExpression(ast["cond"], s, env)
+def evalIf(ast: Dict, env: Environment) -> ExprRef:
+    c: ExprRef = evalExpression(ast["cond"], env)
     if satisfiable(c):
-        e.phpEvalAst(ast["stmts"], s, Environment(env))
-    if satisfiable(Not(c)):
-        e.phpEvalAst(ast["elseifs"], s, Environment(env))
-        if ast["else"] is not None:
-            elseSolver: Solver = copy.deepcopy(s)
-            elseSolver.add(Not(c))
-            for eif in ast["elseifs"]:
-                elseSolver.add(Not(evalExpression(eif["cond"], s, env)))
-            if elseSolver.check() == sat:
-                e.phpEval(ast["else"], s, Environment(env))
+        nenv = env.fork()
+        nenv.symenv.constraints.add(c)
+        e.phpEvalAst(ast["stmts"], env.fork())
+    e.phpEvalAst(ast["elseifs"], env)
+    if ast["else"] is not None:
+        nenv = env.fork()
+        elseSolver = nenv.symenv.constraints
+        elseSolver.add(Not(c))
+        for eif in ast["elseifs"]:
+            elseSolver.add(Not(evalExpression(eif["cond"], env)))
+        if elseSolver.check() == sat:
+            e.phpEval(ast["else"], nenv)
 
 
-def evalElseIf(ast: Dict, s: Solver, env: Environment):
-    if satisfiable(evalExpression(ast["cond"], s, env)):
-        e.phpEvalAst(ast["stmts"], s, env)
+def evalElseIf(ast: Dict, env: Environment):
+    c = evalExpression(ast["cond"], env)
+    if satisfiable(c):
+        nenv = env.fork()
+        nenv.symenv.constraints.add(c)
+        e.phpEvalAst(ast["stmts"], env)
 
 
-def evalElse(ast: Dict, s: Solver, env: Environment):
-    e.phpEvalAst(ast["stmts"], s, env)
+def evalElse(ast: Dict, env: Environment):
+    print(env.symenv.constraints)
+    e.phpEvalAst(ast["stmts"], env)
 
 
 def satisfiable(exp: ExprRef):
