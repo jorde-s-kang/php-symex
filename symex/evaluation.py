@@ -20,7 +20,8 @@ def phpEvalInline(data: str, getVars: Dict = {}, postVars: Dict = {}, constraint
     env.define("_GET", getVars)
     env.define("_POST", postVars)    
     for c in constraints:
-        env.symenv.constraints.add(c)
+        env.symenv.constraints.append(c)
+    print(constraints)
     ast = p.parse_inline(data)
     return phpEvalAst(ast, env)
 

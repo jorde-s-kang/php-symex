@@ -3,7 +3,7 @@ from z3 import *
 class SymbolicEnvironment:
     def __init__(self, env):
         self.symValues = dict()
-        self.constraints = Solver()
+        self.constraints = list()
 
     def __str__(self):
         return f"Symbolic Environment: {self.symValues}, {self.constraints}"
@@ -15,10 +15,14 @@ class SymbolicEnvironment:
         self.symValues[key] = val
 
     def getModel(self):
-        s = copy.deepcopy(self.constraints)
-        for key, val in self.symValues.items():
-            s.add(val)
+        s = Solver()
+        for c in constraints:
+            s.add(c)
         s.check()
         return s.model()
 
-    
+    def sat(self):
+        s = Solver()
+        for c in self.constraints:
+            s.add(c)
+        return s.check() == sat

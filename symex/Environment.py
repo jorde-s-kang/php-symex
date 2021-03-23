@@ -30,7 +30,10 @@ class Environment:
             return False
 
     def fork(self):
-        return Environment(self)
+        e = Environment(self)
+        e.symenv = copy.deepcopy(self.symenv)
+        print(f"NEW SYMENV CONSTRAINTS: {e.symenv.constraints}")
+        return e
         
     def define(self, key: str, val: object, sym=False):
         found = False
@@ -48,5 +51,4 @@ class Environment:
             if sym:
                 self.symenv.define(key, val)
             else:
-                curr.env[key] = val
-            
+                curr.env[key] = val            

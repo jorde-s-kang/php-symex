@@ -8,18 +8,25 @@ from typing import Dict
 
 def evalIf(ast: Dict, env: Environment) -> ExprRef:
     c: ExprRef = evalExpression(ast["cond"], env)
-    if satisfiable(c):
+    print(f"INITIAL CONSTRAINTS: {env.symenv.constraints}")
+    nenv = env.fork()
+    nenv.symenv.constraints.append(c)
+    if nenv.symenv.sat():
         nenv = env.fork()
-        nenv.symenv.constraints.add(c)
-        e.phpEvalAst(ast["stmts"], env.fork())
-    e.phpEvalAst(ast["elseifs"], env)
+        nenv.symenv.constraints.append(c)
+        print(f"TAKING IF PATH: {nenv.symenv.constraints}")
+        e.phpEvalAst(ast["stmts"], nenv)
+    e.phpEvalAst(ast["elseifs"], nenv)
     if ast["else"] is not None:
+        print("else fork")
         nenv = env.fork()
-        elseSolver = nenv.symenv.constraints
-        elseSolver.add(Not(c))
+        print(f"FORKED ELSE CONSTRAINTS: {nenv.symenv.constraints}")
+        nenv.symenv.constraints.append(Not(c))
+        print(f"ADDED ELSE CONDITION {nenv.symenv.constraints}")
         for eif in ast["elseifs"]:
-            elseSolver.add(Not(evalExpression(eif["cond"], env)))
-        if elseSolver.check() == sat:
+            nenv.symenv.constraints.append(Not(evalExpression(eif["cond"], env)))
+        if nenv.symenv.sat():
+            print(f"TAKING ELSE PATH: {nenv.symenv.constraints}")
             e.phpEval(ast["else"], nenv)
 
 
@@ -27,7 +34,7 @@ def evalElseIf(ast: Dict, env: Environment):
     c = evalExpression(ast["cond"], env)
     if satisfiable(c):
         nenv = env.fork()
-        nenv.symenv.constraints.add(c)
+        nenv.symenv.constraints.append(c)
         e.phpEvalAst(ast["stmts"], env)
 
 

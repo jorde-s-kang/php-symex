@@ -59,14 +59,14 @@ def constFetch(ast: Dict, env: Environment):
     return consts[ast["name"]["parts"][0]]
 
 def varAssign(ast: Dict, env: Environment):
-    try:
-        var = evalExpression(ast["var"], env)
-        val = evalExpression(ast["expr"], env)
-    except KeyError:
-        raise ExpressionError(ast, env)
+    var = None
+    val = evalExpression(ast["expr"], env)
+    if ast["var"]["nodeType"] == "Expr_Variable":
+        var = ast["var"]["name"]
     if type(val).__bases__[0] == ExprRef:
         env.symenv.define(var, val)
-    env.define(var, val)
+    else:
+        env.define(var, val)
 
 def varLookup(ast: Dict, env: Environment):
     var = ast["name"]
