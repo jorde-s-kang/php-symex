@@ -32,7 +32,7 @@ class Environment:
     def fork(self):
         e = Environment(self)
         e.symenv = copy.deepcopy(self.symenv)
-        print(f"NEW SYMENV CONSTRAINTS: {e.symenv.constraints}")
+        # print(f"NEW SYMENV CONSTRAINTS: {e.symenv.constraints}")
         return e
         
     def define(self, key: str, val: object, sym=False):
