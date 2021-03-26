@@ -13,22 +13,24 @@ class Environment:
         
     def lookup(self, key: str, sym = False):
         try:
-            out = None
-            if sym:
-                out = self.symenv.lookup(key)
-            else:
-                out = self.env[key]
+            out = self.env[key]
             return out
         except KeyError:
-            if self.parent is not None:
-                out = self.parent.lookup(key, sym)
-                return out
+            try:
+                self.symenv.symValues[key]
+            except KeyError:
+                if self.parent is not None:
+                    out = self.parent.lookup(key, sym)
+                    return out
 
     def __envcheck__(self, key: str) -> bool:
         try:
+            a = self.env[key]
             return True
         except KeyError:
             return False
+        except AttributeError:
+            return false
 
     def fork(self):
         e = Environment(self)
@@ -36,20 +38,14 @@ class Environment:
         # print(f"NEW SYMENV CONSTRAINTS: {e.symenv.constraints}")
         return e
         
-    def define(self, key: str, val: object, sym=False):
+    def define(self, key: str, val: object):
         found = False
         curr = self
         while curr is not None:  # linked list search
             if curr.__envcheck__(key):
-                if sym:
-                    curr.symenv.define(key, val)
-                else:
-                    curr.env[key] = val
+                curr.env[key] = val
                 found = True
                 break
             curr = curr.parent
         if not found:
-            if sym:
-                self.symenv.define(key, val)
-            else:
-                curr.env[key] = val            
+            self.env[key] = val            

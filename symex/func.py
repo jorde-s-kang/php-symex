@@ -27,17 +27,16 @@ class PhpFunction:
 
 
     def run(self, params, env):
-
         i = 0
         if(self.builtin):
-            self.body(*params, env)
+            return self.body(*params, env)
         else:
             env = env.fork()
             while i < len(params):
                 p = self.params[i]
                 env.define(p["name"], params[i])
                 i += 1
-            e.phpEvalAst(self.body, env)
+            return e.phpEvalAst(self.body, env)
 
 def define(ast, env):
     fn = phpFunction(ast, env)
@@ -53,10 +52,18 @@ def addBuiltIn(name, fn):
 def phpHtmlSpecialChars(string,env):
     print(f"escaped: {string}")
     env.escapedStrings.append(string)
-    return env
+    return string
 
 addBuiltIn("htmlspecialchars", phpHtmlSpecialChars)
 addBuiltIn("htmlentities", phpHtmlSpecialChars)
+
+def phpMysqliQuery(conn, string, env):
+    for p in string:
+        if type(p) == z3.SeqRef:
+            if p not in env.escapedStrings:
+                print("WARNING: UNESCAPED STRING passed to database query!")
+addBuiltIn("mysqli_query", phpMysqliQuery)
+                
 
 # Localise to functions that do database functions and expand to
 # functions that call those functions
