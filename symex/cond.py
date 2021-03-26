@@ -26,10 +26,7 @@ def evalIf(ast: Dict, env: Environment) -> ExprRef:
     #     nenv.symenv.constraints.append(c)
     #     print(f"TAKING IF PATH: {nenv.symenv.constraints}")
     #     e.phpEvalAst(ast["stmts"], nenv)
-    try:
-        e.phpEvalAst(ast["elseifs"], env)
-    except KeyError:
-        pass
+    e.phpEvalAst(ast["elseifs"], env)
     if ast["else"] is not None:
         conds = [Not(evalExpression(c["cond"], env)) for c in ast["elseifs"]]
         conds.append(Not(c))
@@ -48,7 +45,8 @@ def evalIf(ast: Dict, env: Environment) -> ExprRef:
 
 
 def evalElseIf(ast: Dict, env: Environment):
-    evalIf(ast, env)
+    c = evalExpression(ast["cond"], env)
+    evalConditional(ast, env, c)
 
 
 def evalElse(ast: Dict, env: Environment):

@@ -8,6 +8,7 @@ from typing import List, Dict
 import symex.expression as expr
 import symex.cond as cond
 import symex.loop as loop
+import symex.func as func
 
 def phpEvalInline(data: str, getVars: Dict = {}, postVars: Dict = {}, constraints = []):
     """
@@ -58,8 +59,8 @@ def phpEval(ast: Dict, env: Environment) -> ExprRef:
                {'nodeType': 'Stmt_Else'},       lambda x: cond.evalElse,
                {'nodeType': 'Stmt_While'},      lambda x: loop.evalWhile,
                {'nodeType': 'Stmt_For'},        lambda x: loop.evalFor,
-               {'nodeType': 'Stmt_Foreach'},    lambda x: loop.evalForEach
-               )
+               {'nodeType': 'Stmt_Foreach'},    lambda x: loop.evalForEach,
+               {'nodeType': 'Stmt_Function'},   lambda x: func.define)
     return fn(ast, env)
 
 
