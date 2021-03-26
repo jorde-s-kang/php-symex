@@ -1,5 +1,5 @@
 import z3
-from symex.expression import evalExpression
+import symex.expression as exp
 import symex.evaluation as e
 phpFunctions = {}
 
@@ -16,7 +16,6 @@ phpFunctions = {}
 
 class phpFunction:
     def __init__(self, ast, env, builtin=False):
-        print(ast["params"][0])
         self.params  = [p["var"]["name"] for p in ast["params"]]
         self.body    = ast["stmts"]
         self.builtin = builtin
@@ -28,13 +27,11 @@ class phpFunction:
             p = self.params[i]
             env.define(p["name"], params[i])
             i += 1
-        e.phpEvalAst(self.body)
+        e.phpEvalAst(self.body, env)
 
 def define(ast, env):
     fn = phpFunction(ast, env)
-    print(ast["name"])
     phpFunctions[ast["name"]["name"]] = fn
-    print(phpFunctions)
 
 
 def parseParam(ast, env):

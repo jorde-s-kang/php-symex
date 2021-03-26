@@ -6,7 +6,7 @@ import re
 from pampy import match, _
 from symex.Exceptions import ExpressionError
 import symex.datatypes as dt
-
+import symex.func as func
 def evalExpression(exp: Dict, env: Environment) -> ExprRef:
     e = None
     try:
@@ -32,9 +32,8 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
 
 def funcCall(ast: Dict, env: Environment):
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
-    fn: Callable = lookup.get_fn(ast["name"]["parts"][0])
-    return fn(*args)
-
+    fn = func.phpFunctions[ast["name"]["parts"][0]]
+    fn.run(args, env)
 
 def binop(ast: Dict, env: Environment) -> Callable:
     op: Callable = lookup.get_binop(ast["nodeType"])
