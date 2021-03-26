@@ -1,8 +1,10 @@
 import z3
 import symex.expression as exp
 import symex.evaluation as e
-phpFunctions = {}
+from symex.Environment import Environment
 
+phpFunctions = {}
+escapedStrings = list()
 
 
 
@@ -14,25 +16,47 @@ phpFunctions = {}
 # Can skip other function calls probably
 
 
-class phpFunction:
+class PhpFunction:
     def __init__(self, ast, env, builtin=False):
-        self.params  = [p["var"]["name"] for p in ast["params"]]
-        self.body    = ast["stmts"]
-        self.builtin = builtin
+        self.builtin = builtin        
+        if not self.builtin:
+            self.params  = [p["var"]["name"] for p in ast["params"]]
+            self.body    = ast["stmts"]
+        else:
+            self.body = ast
+
 
     def run(self, params, env):
-        env = env.fork()
+
         i = 0
-        while i < len(params):
-            p = self.params[i]
-            env.define(p["name"], params[i])
-            i += 1
-        e.phpEvalAst(self.body, env)
+        if(self.builtin):
+            self.body(*params, env)
+        else:
+            env = env.fork()
+            while i < len(params):
+                p = self.params[i]
+                env.define(p["name"], params[i])
+                i += 1
+            e.phpEvalAst(self.body, env)
 
 def define(ast, env):
     fn = phpFunction(ast, env)
     phpFunctions[ast["name"]["name"]] = fn
 
-
 def parseParam(ast, env):
     return ast["name"]
+
+
+def addBuiltIn(name, fn):
+    phpFunctions[name] = PhpFunction(fn,Environment(), builtin=True)
+
+def phpHtmlSpecialChars(string,env):
+    print(f"escaped: {string}")
+    env.escapedStrings.append(string)
+    return env
+
+addBuiltIn("htmlspecialchars", phpHtmlSpecialChars)
+addBuiltIn("htmlentities", phpHtmlSpecialChars)
+
+# Localise to functions that do database functions and expand to
+# functions that call those functions

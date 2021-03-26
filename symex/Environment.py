@@ -6,6 +6,7 @@ class Environment:
         self.env: dict = dict()
         self.parent = p
         self.symenv = SymbolicEnvironment(self)
+        self.escapedStrings = []
 
     def __str__(self):
         return f"{self.env}\n{self.symenv}"

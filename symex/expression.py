@@ -46,11 +46,16 @@ def binop(ast: Dict, env: Environment) -> Callable:
 
 def parseValue(ast: Dict, env: Environment):
     t = match(ast["nodeType"],
-              "Scalar_LNumber", lambda x: int,
-              "Boolean", lambda x: bool,
-              "Scalar_String", lambda x: str,
-              "Scalar_DNumber", lambda x: float)
-    return t(ast["value"])
+              "Scalar_LNumber",  lambda x: lambda v, env: int(v),
+              "Boolean",         lambda x: lambda v, env: bool(v),
+              "Scalar_String",   lambda x: lambda v, env: str(v),
+              "Scalar_DNumber",  lambda x: lambda v, env: float(v),
+              "Scalar_Encapsed", lambda x: lambda v, env: encapsedString(v, env),
+              "Scalar_EncapsedStringPart", lambda x: lambda v, env: str(v))
+    try:
+        return t(ast["value"], env)
+    except KeyError:
+        return t(ast["parts"], env)
 
 def constFetch(ast: Dict, env: Environment):
     consts = {"True": True,
@@ -88,3 +93,6 @@ def arrayFetch(ast: Dict, env: Environment):
     arr = evalExpression(ast["var"], env)
     ind = evalExpression(ast["dim"], env)
     return arr[ind]
+
+def encapsedString(ast, env):
+    return [evalExpression(p, env) for p in ast]
