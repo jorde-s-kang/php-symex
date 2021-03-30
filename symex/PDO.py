@@ -23,7 +23,18 @@ class PhpPDOStatement:
             self.query = self.__parse__(qstring)
         elif type(qstring) == list:
             qlist = []
-            
+            for i in qstring:
+                if type(i)  == str:
+                    qlist.append(self.__parse__(i))
+                else:
+                    qlist.append(i)
+            self.query = []
+            for i in qlist:
+                if type(i) == list:
+                    for j in i:
+                        self.query.append(j)
+                else:
+                    self.query.append(i)
         
 
     def __parse__(self, qstring):
