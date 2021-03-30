@@ -7,15 +7,6 @@ phpFunctions = {}
 escapedStrings = list()
 
 
-
-# includes (?)
-# Classes
-# Function definition
-# String related functions
-# PDO, mysqli related functions
-# Can skip other function calls probably
-
-
 class PhpFunction:
     def __init__(self, ast, env, builtin=False):
         self.builtin = builtin        
@@ -61,9 +52,9 @@ def phpMysqliQuery(conn, string, env):
     for p in string:
         if type(p) == z3.SeqRef:
             if p not in env.escapedStrings:
-                print("WARNING: UNESCAPED STRING passed to database query!")
+                print("WARNING: UNESCAPED STRING passed to database query, potential SQL injection vulnerability!")
+            print("WARNING: Using non-parameterized queries with user input!")
 addBuiltIn("mysqli_query", phpMysqliQuery)
-                
 
 # Localise to functions that do database functions and expand to
 # functions that call those functions

@@ -32,7 +32,11 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
 
 def funcCall(ast: Dict, env: Environment):
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
-    fn = func.phpFunctions[ast["name"]["parts"][0]]
+    fn = None
+    try:
+        fn = func.phpFunctions[ast["name"]["parts"][0]]
+    except KeyError:
+        fn = lambda x, y: return None
     return fn.run(args, env)
 
 def binop(ast: Dict, env: Environment) -> Callable:
