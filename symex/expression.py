@@ -25,19 +25,23 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
                "Expr_Variable",                 lambda x: varLookup,
                "Expr_Array",                    lambda x: array,
                "Expr_ArrayDimFetch",            lambda x: arrayFetch,
-               "Expr_ConstFetch",               lambda x: constFetch
-    )
+               "Expr_ConstFetch",               lambda x: constFetch,
+               "Expr_MethodCall",               lambda x: methodCall)
     return fn(e, env)
 
 
 def funcCall(ast: Dict, env: Environment):
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
-    fn = None
+    # fn = lambda x,y: return 1
     try:
         fn = func.phpFunctions[ast["name"]["parts"][0]]
     except KeyError:
-        fn = lambda x, y: return None
-    return fn.run(args, env)
+        pass
+    print(type(fn))
+    if type(fn) == type:
+        return fn(*args, env)
+    else:
+        return fn.run(args, env)
 
 def binop(ast: Dict, env: Environment) -> Callable:
     op: Callable = lookup.get_binop(ast["nodeType"])
@@ -100,3 +104,9 @@ def arrayFetch(ast: Dict, env: Environment):
 
 def encapsedString(ast, env):
     return [evalExpression(p, env) for p in ast]
+
+def methodCall(ast, env):
+    v = evalExpression(ast["var"], env)
+    method = getattr(v, ast["name"]["name"])
+    args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
+    return method(*args, env)

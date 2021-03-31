@@ -1,9 +1,11 @@
 import re
 import z3
+import symex.func
 
 class PhpPDO:
-    def __init__(self, dsn, username="", passwd="", options=[]):
-        return 0
+    def __init__(self, dsn="", username="", passwd="", options=[]):
+        return None
+
     def exec(self, statement, env):
         if type(p) == list:
             for p in string:
@@ -16,7 +18,7 @@ class PhpPDO:
 
     def query(self, statement, env):
         self.exec(statement, env)
-        
+
 class PhpPDOStatement:
     def __init__(self, qstring, env):
         if type(qstring) == str:
@@ -34,7 +36,7 @@ class PhpPDOStatement:
                     for j in i:
                         self.query.append(j)
                 else:
-                    self.query.append(i)
+                    self.query.append(i)                    
         
 
     def __parse__(self, qstring):
