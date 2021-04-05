@@ -29,19 +29,20 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
                "Expr_ArrayDimFetch",            lambda x: arrayFetch,
                "Expr_ConstFetch",               lambda x: constFetch,
                "Expr_MethodCall",               lambda x: methodCall,
-               None,                            lambda x: lambda x, y: None)
+               None,                            lambda x: lambda x, y: None,
+               "Expr_PropertyFetch",            lambda x: propertyFetch)
     return fn(e, env)
 
 
 def funcCall(ast: Dict, env: Environment):
-    print(func.phpFunctions)
+    # print(func.phpFunctions)
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
     fn = lambda x, y: None
     try:
         fn = func.phpFunctions[ast["name"]["parts"][0]]
     except KeyError:
         pass
-    print(fn)
+    # print(fn)
     if type(fn) == type:
         return fn(*args, env=env)
     else:
@@ -75,14 +76,22 @@ def constFetch(ast: Dict, env: Environment):
     return consts[ast["name"]["parts"][0]]
 
 def varAssign(ast: Dict, env: Environment):
-    var = None
-    val = evalExpression(ast["expr"], env)
-    if ast["var"]["nodeType"] == "Expr_Variable":
-        var = ast["var"]["name"]
-    if type(val).__bases__[0] == ExprRef:
-        env.define(var, val)
+    propfetch = False
+    propfetch = ast["var"]["nodeType"] == "Expr_PropertyFetch"
+    if propfetch:
+        obj = ast["var"]
+        var = evalExpression(obj["var"], env)
+        identifier = obj["name"]["name"]
+        setattr(var, identifier, evalExpression(ast["expr"], env)) 
     else:
-        env.define(var, val)
+        var = None
+        val = evalExpression(ast["expr"], env)
+        if ast["var"]["nodeType"] == "Expr_Variable":
+            var = ast["var"]["name"]
+        if type(val).__bases__[0] == ExprRef:
+            env.define(var, val)
+        else:
+            env.define(var, val)
 
 def varLookup(ast: Dict, env: Environment):
     var = ast["name"]
@@ -114,3 +123,7 @@ def methodCall(ast, env):
     method = getattr(v, ast["name"]["name"])
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
     return method(args, env=env)
+
+def propertyFetch(ast, env):
+    obj = evalExpression(ast["var"], env)
+    return getattr(obj, ast["name"]["name"])

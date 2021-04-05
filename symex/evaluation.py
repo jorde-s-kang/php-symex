@@ -69,3 +69,5 @@ def phpEval(ast: Dict, env: Environment) -> ExprRef:
 def phpEvalEcho(ast: Dict, env: Environment):
     exprs = [expr.evalExpression(ast, env) for ast in ast["exprs"]]
     print(*exprs)
+
+    
