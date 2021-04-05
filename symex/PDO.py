@@ -74,7 +74,7 @@ class PhpPDOStatement:
     def bindParam(self, param, var, dtype, env):
         return 0
 
-    def BindValue():
+    def bindValue():
         return 0
     def bindColumn():
         return 0

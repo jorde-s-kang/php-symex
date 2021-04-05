@@ -62,7 +62,7 @@ def phpEval(ast: Dict, env: Environment) -> ExprRef:
                {'nodeType': 'Stmt_For'},        lambda x: loop.evalFor,
                {'nodeType': 'Stmt_Foreach'},    lambda x: loop.evalForEach,
                {'nodeType': 'Stmt_Function'},   lambda x: func.define,
-               {'nodeType': 'Stmt_Class'},      lambda x: obj.defClass)
+               {'nodeType': 'Stmt_Class'},      lambda x: obj.genClass)
     return fn(ast, env)
 
 

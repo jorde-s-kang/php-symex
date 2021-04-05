@@ -34,15 +34,16 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
 
 
 def funcCall(ast: Dict, env: Environment):
+    print(func.phpFunctions)
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
-    # fn = lambda x,y: return 1
+    fn = lambda x, y: None
     try:
         fn = func.phpFunctions[ast["name"]["parts"][0]]
     except KeyError:
         pass
-    print(type(fn))
+    print(fn)
     if type(fn) == type:
-        return fn(*args, env)
+        return fn(*args, env=env)
     else:
         return fn.run(args, env)
 
@@ -112,4 +113,4 @@ def methodCall(ast, env):
     v = evalExpression(ast["var"], env)
     method = getattr(v, ast["name"]["name"])
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
-    return method(*args, env)
+    return method(args, env=env)
