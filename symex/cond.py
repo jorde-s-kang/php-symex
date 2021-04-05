@@ -1,6 +1,6 @@
 from z3 import Solver, ExprRef, sat, Not, And
 from symex.Environment import Environment
-from symex.expression import evalExpression
+import symex.expression as expr
 import symex.evaluation as e
 import copy
 from typing import Dict
@@ -19,7 +19,7 @@ def evalConditional(ast: Dict, env: Environment, c: ExprRef):
     
 
 def evalIf(ast: Dict, env: Environment) -> ExprRef:
-    c: ExprRef = evalExpression(ast["cond"], env)
+    c: ExprRef = expr.evalExpression(ast["cond"], env)
     evalConditional(ast, env, c)
     # if nenv.symenv.sat():
     #     nenv = env.fork()
@@ -28,7 +28,7 @@ def evalIf(ast: Dict, env: Environment) -> ExprRef:
     #     e.phpEvalAst(ast["stmts"], nenv)
     e.phpEvalAst(ast["elseifs"], env)
     if ast["else"] is not None:
-        conds = [Not(evalExpression(c["cond"], env)) for c in ast["elseifs"]]
+        conds = [Not(expr.evalExpression(c["cond"], env)) for c in ast["elseifs"]]
         conds.append(Not(c))
         elsec = And(*conds)
         evalConditional(ast["else"], env, elsec)
@@ -38,14 +38,14 @@ def evalIf(ast: Dict, env: Environment) -> ExprRef:
         # nenv.symenv.constraints.append(Not(c))
         # print(f"ADDED ELSE CONDITION {nenv.symenv.constraints}")
         # for eif in ast["elseifs"]:
-        #     nenv.symenv.constraints.append(Not(evalExpression(eif["cond"], env)))
+        #     nenv.symenv.constraints.append(Not(expr.evalExpression(eif["cond"], env)))
         # if nenv.symenv.sat():
         #     print(f"TAKING ELSE PATH: {nenv.symenv.constraints}")
         #     e.phpEval(ast["else"], nenv)
 
 
 def evalElseIf(ast: Dict, env: Environment):
-    c = evalExpression(ast["cond"], env)
+    c = expr.evalExpression(ast["cond"], env)
     evalConditional(ast, env, c)
 
 

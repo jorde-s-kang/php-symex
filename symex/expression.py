@@ -16,6 +16,8 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
             raise KeyError()
     except KeyError:
         e = exp
+    except TypeError:
+        return None
     # print(e)
     fn = match(e["nodeType"],
                re.compile("^Expr_BinaryOp_.*"), lambda x: binop,
@@ -26,7 +28,8 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
                "Expr_Array",                    lambda x: array,
                "Expr_ArrayDimFetch",            lambda x: arrayFetch,
                "Expr_ConstFetch",               lambda x: constFetch,
-               "Expr_MethodCall",               lambda x: methodCall)
+               "Expr_MethodCall",               lambda x: methodCall,
+               None,                            lambda x: lambda x, y: None)
     return fn(e, env)
 
 
