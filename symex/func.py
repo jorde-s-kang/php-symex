@@ -26,12 +26,12 @@ class PhpFunction:
             env = env.fork()
             while i < len(params):
                 p = self.params[i]
-                env.define(p["name"], params[i])
+                env.define(p, params[i])
                 i += 1
             return e.phpEvalAst(self.body, env)
 
 def define(ast, env):
-    fn = phpFunction(ast, env)
+    fn = PhpFunction(ast, env)
     phpFunctions[ast["name"]["name"]] = fn
 
 def parseParam(ast, env):
