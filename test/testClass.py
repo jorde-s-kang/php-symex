@@ -14,7 +14,7 @@ class TestClass(unittest.TestCase):
 
     def test_methodcall(self):
         with Capturing() as output:
-            e.phpEvalInline("<?php class Fruit {public $name; public $color; function set_name($name) { $this->name = $name; } function test() { echo 'yes';}}; $f = Fruit(); $f->color = 'test';  $f->test();")
+            e.phpEvalInline("<?php class Fruit {public $name; public $color; function set_name($name) { $this->name = $name; } function test($a) { echo $a;}}; $f = Fruit(); $f->color = 'test';  $f->test('yes');")
         self.assertEqual(output[0], "yes")
 
 

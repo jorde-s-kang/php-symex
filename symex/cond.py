@@ -7,15 +7,16 @@ from typing import Dict
 
 
 def evalConditional(ast: Dict, env: Environment, c: ExprRef):
-    print(f"FORK @ LINE {ast['attributes']['startLine']} : {ast['nodeType']} : {c}")
+    # print(f"FORK @ LINE {ast['attributes']['startLine']} : {ast['nodeType']} : {c}")
     nenv = env.fork()
     nenv.symenv.constraints.append(c)
-    print(f"FORK CONDITIONS {nenv.symenv.constraints}")
+    # print(f"FORK CONDITIONS {nenv.symenv.constraints}")
     if nenv.symenv.sat():
-        print("SATISFIABLE, TAKING FORK")
+        # print("SATISFIABLE, TAKING FORK")
         e.phpEvalAst(ast["stmts"], nenv)
-    else:
-        print("UNSATISFIABLE")
+    # else:
+    #     re
+    #     # print("UNSATISFIABLE")
     
 
 def evalIf(ast: Dict, env: Environment) -> ExprRef:

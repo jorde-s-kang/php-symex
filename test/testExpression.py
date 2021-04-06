@@ -15,7 +15,7 @@ class TestExpression(unittest.TestCase):
             e.phpEvalInline("<?php echo 1 + (4 / 2);")
         self.assertEqual(output[0], "3.0")
 
-    def test_variables(self):
+    def test_variable(self):
         with Capturing() as output:
             e.phpEvalInline("<?php $a = 1; echo $a;")
         self.assertEqual(output[0], "1")
