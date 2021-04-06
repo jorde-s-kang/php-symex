@@ -2,7 +2,7 @@ import z3
 import symex.expression as exp
 import symex.evaluation as e
 from symex.Environment import Environment
-import symex.PDO as PDO
+import symex.PDO as pdo
 phpFunctions = {}
 escapedStrings = list()
 
@@ -42,6 +42,7 @@ def addBuiltIn(name, fn):
     phpFunctions[name] = PhpFunction(fn,Environment(), builtin=True)
 
 def addConstructor(name, fn):
+    global phpFunction
     phpFunctions[name] = fn
 
 def phpHtmlSpecialChars(string,env):
@@ -59,7 +60,7 @@ def phpMysqliQuery(conn, string, env):
                 print("WARNING: UNESCAPED STRING passed to database query, potential SQL injection vulnerability!")
             print("WARNING: Using non-parameterized queries with user input!")
 addBuiltIn("mysqli_query", phpMysqliQuery)
-
-addConstructor("PDO", PDO.PhpPDO)
+addConstructor("PDO", pdo.PhpPDO)
+# addConstructor("PDO", pdo.PhpPDO)
 # Localise to functions that do database functions and expand to
 # functions that call those functions

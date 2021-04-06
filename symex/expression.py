@@ -35,15 +35,15 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
 
 
 def funcCall(ast: Dict, env: Environment):
-    # print(func.phpFunctions)
+    print(func.phpFunctions)
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
     fn = lambda x, y: None
     try:
         fn = func.phpFunctions[ast["name"]["parts"][0]]
     except KeyError:
         pass
-    # print(fn)
-    if type(fn) == type:
+    print(fn)
+    if callable(fn):
         return fn(*args, env=env)
     else:
         return fn.run(args, env)

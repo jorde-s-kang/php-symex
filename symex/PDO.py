@@ -1,9 +1,8 @@
 import re
 import z3
-import symex.func
 
 class PhpPDO:
-    def __init__(self, dsn="", username="", passwd="", options=[]):
+    def __init__(self, dsn="", username="", passwd="", options=[], env=None):
         return None
 
     def exec(self, statement, env):
@@ -72,14 +71,18 @@ class PhpPDOStatement:
         return out
  
     def bindParam(self, param, var, dtype, env):
-        return 0
+        bindValue(param, var)
 
-    def bindValue():
-        return 0
+    def bindValue(self, key, value):
+        item = list(filter(lambda x: type(x) == PhpPDOKeyword and x.name == 1, self.query))[0]
+        item.value = value
+
     def bindColumn():
         return 0
-    def execute():
-        return 0
+    def execute(self, *args, env=None):
+        l = list(filter(lambda x: type(x) == z3.ExprRef or z3.ExprRef in type(x).__bases__, self.query))
+        if len(l) > 0:
+            print(f"SQL INJECTION VULNERABILITY, UNSANITIZED INPUT PASSED TO PREPARED STATEMENT\nVULNERABLE VARS: {l}")
     def fetch():
         return 0
     def fetchAll():
