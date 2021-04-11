@@ -22,6 +22,7 @@ class Environment:
                 if self.parent is not None:
                     out = self.parent.lookup(key, sym)
                     return out
+            return None
 
     def __envcheck__(self, key: str) -> bool:
         try:

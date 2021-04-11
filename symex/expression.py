@@ -7,7 +7,13 @@ from pampy import match, _
 from symex.Exceptions import ExpressionError
 import symex.datatypes as dt
 import symex.func as func
-def evalExpression(exp: Dict, env: Environment) -> ExprRef:
+def evalExpression(exp: Dict, env: Environment):
+    """
+    Evaluates a PHP expression
+    :param exp: The abstract syntax tree of an expression
+    :param env: The environment the expression will be called in
+    """
+
     e = None
     try:
         if exp["nodeType"] != "Expr_Assign":
@@ -30,25 +36,34 @@ def evalExpression(exp: Dict, env: Environment) -> ExprRef:
                "Expr_ConstFetch",               lambda x: constFetch,
                "Expr_MethodCall",               lambda x: methodCall,
                None,                            lambda x: lambda x, y: None,
-               "Expr_PropertyFetch",            lambda x: propertyFetch)
+               "Expr_PropertyFetch",            lambda x: propertyFetch,
+               "Expr_Include",                  lambda x: lambda x,y: None)
     return fn(e, env)
 
 
 def funcCall(ast: Dict, env: Environment):
-    print(func.phpFunctions)
+    """
+    Calls a defined function
+    :param ast: The abstract syntax tree of a function call
+    :param env: The environment the expression will be called in
+    """
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
     fn = lambda x, y: None
     try:
         fn = func.phpFunctions[ast["name"]["parts"][0]]
     except KeyError:
         pass
-    print(fn)
     if callable(fn):
         return fn(*args, env=env)
     else:
         return fn.run(args, env)
 
 def binop(ast: Dict, env: Environment) -> Callable:
+    """
+    Evaluates a binary operator expression
+    :param ast: The abstract syntax tree of a binary operation
+    :param env: The environment the expression will be called in
+    """
     op: Callable = lookup.get_binop(ast["nodeType"])
     def binaryOperator(ast: Dict, env: Environment):
         left  = evalExpression(ast["left"], env)
@@ -58,6 +73,11 @@ def binop(ast: Dict, env: Environment) -> Callable:
 
 
 def parseValue(ast: Dict, env: Environment):
+    """
+    Parses a scalar value
+    :param ast: The abstract syntax tree of a scalar value
+    :param env: The environment the expression will be called in
+    """
     t = match(ast["nodeType"],
               "Scalar_LNumber",  lambda x: lambda v, env: int(v),
               "Boolean",         lambda x: lambda v, env: bool(v),
@@ -71,11 +91,20 @@ def parseValue(ast: Dict, env: Environment):
         return t(ast["parts"], env)
 
 def constFetch(ast: Dict, env: Environment):
+    """For some reason booleans are treated as constants rather than a
+    typical datatype. This is just to handle booleans.
+    :param ast: The abstract syntax tree of a scalar value
+    :param env: The environment the expression will be called in
+    """
     consts = {"True": True,
               "False": False}
     return consts[ast["name"]["parts"][0]]
 
 def varAssign(ast: Dict, env: Environment):
+    """Define a variable in the current environment
+    :param ast: The abstract syntax tree of a variable assignment
+    :param env: The environment the expression will be called in
+    """
     propfetch = False
     propfetch = ast["var"]["nodeType"] == "Expr_PropertyFetch"
     if propfetch:
@@ -94,11 +123,19 @@ def varAssign(ast: Dict, env: Environment):
             env.define(var, val)
 
 def varLookup(ast: Dict, env: Environment):
+    """Lookup the variable in the current environment.
+    :param ast: The abstract syntax tree of a variable lookup
+    :param env: The environment the expression will be called in
+    """
     var = ast["name"]
     val = env.lookup(var)
     return val
 
 def array(ast: Dict, env: Environment):
+    """ Evaluate a PHP array
+    :param ast: The abstract syntax tree of an array
+    :param env: The environment the expression will be called in
+    """
     items = dict()
     c = 0
     for i in ast["items"]:
@@ -111,19 +148,38 @@ def array(ast: Dict, env: Environment):
     return items
 
 def arrayFetch(ast: Dict, env: Environment):
+    """Fetches an item from an array
+    :param ast: The abstract syntax tree of an array lookup
+    :param env: The environment the expression will be called in
+    """
     arr = evalExpression(ast["var"], env)
     ind = evalExpression(ast["dim"], env)
     return arr[ind]
 
 def encapsedString(ast, env):
+    """
+    Translates an encapsulated string in PHP into a python array
+    :param ast: The abstract syntax tree of an encapsulated string
+    :param env: The environment the expression will be called in
+    """
     return [evalExpression(p, env) for p in ast]
 
 def methodCall(ast, env):
+    """
+    Calls a method on an object in PHP
+    :param ast: The abstract syntax tree of a method call
+    :param env: The environment the expression will be called in
+    """
     v = evalExpression(ast["var"], env)
     method = getattr(v, ast["name"]["name"])
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
     return method(args, env=env)
 
 def propertyFetch(ast, env):
+    """
+    Fetches a property from an object in PHP
+    :param ast: The abstract syntax tree of a property fetch
+    :param env: The environment the expression will be called in
+    """
     obj = evalExpression(ast["var"], env)
     return getattr(obj, ast["name"]["name"])

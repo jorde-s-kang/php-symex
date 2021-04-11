@@ -3,6 +3,9 @@ import symex.expression as exp
 import symex.evaluation as e
 from symex.Environment import Environment
 import symex.PDO as pdo
+import symex.stdlib.encoding as encoding
+import symex.stdlib.mysql as mysql
+import symex.stdlib.varfuns as varfuns
 phpFunctions = {}
 escapedStrings = list()
 
@@ -45,22 +48,25 @@ def addConstructor(name, fn):
     global phpFunction
     phpFunctions[name] = fn
 
-def phpHtmlSpecialChars(string,env):
-    print(f"escaped: {string}")
-    env.escapedStrings.append(string)
-    return string
 
-addBuiltIn("htmlspecialchars", phpHtmlSpecialChars)
-addBuiltIn("htmlentities", phpHtmlSpecialChars)
+# Encoding
+addBuiltIn("htmlspecialchars",    encoding.phpEncodeString)
+addBuiltIn("htmlentities",        encoding.phpEncodeString)
+addBuiltIn("md5",                 encoding.phpEncodeString)
+addBuiltIn("mysql_escape_string", encoding.phpEncodeString)
 
-def phpMysqliQuery(conn, string, env):
-    for p in string:
-        if type(p) == z3.SeqRef:
-            if p not in env.escapedStrings:
-                print("WARNING: UNESCAPED STRING passed to database query, potential SQL injection vulnerability!")
-            print("WARNING: Using non-parameterized queries with user input!")
-addBuiltIn("mysqli_query", phpMysqliQuery)
+# Mysql functional interface
+addBuiltIn("mysql_query",   mysql.phpMysqlQuery)
+addBuiltIn("mysql_connect", mysql.MysqlConnection)
+
+# Database object interfaces
 addConstructor("PDO", pdo.PhpPDO)
-# addConstructor("PDO", pdo.PhpPDO)
-# Localise to functions that do database functions and expand to
-# functions that call those functions
+
+# Variable functions
+addBuiltIn("gettype", varfuns.varType)
+addBuiltIn("isset",  varfuns.isset)
+addBuiltIn("is_int", varfuns.phpIsInt)
+addBuiltIn("is_integer", varfuns.phpIsInt)
+addBuiltIn("is_long", varfuns.phpIsInt)
+addBuiltIn("is_double", varfuns.phpIsFloat)
+addBuiltIn("is_float", varfuns.phpIsFloat)
