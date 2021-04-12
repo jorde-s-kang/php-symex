@@ -13,5 +13,5 @@ def typeFun(a, b):
     return retFun
 
 phpIsInt = typeFun(int, z3.Int)
-phpIsFloat = typeFun(float, z3.Float)
+phpIsFloat = typeFun(float, z3.Float32)
 phpIsString = typeFun(str, z3.String)
