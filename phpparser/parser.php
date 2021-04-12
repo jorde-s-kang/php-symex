@@ -4,10 +4,10 @@ use PhpParser\ParserFactory;
 header('Content-Type: application/json');
 
 $code = "";
-if($_GET["mode"] == "inline") {
-    $code = $_GET["data"];
-} elseif($_GET["mode"] == "file") {
-    $code = file_get_contents($_GET["data"]);
+if($argv[1] == "inline") {
+    $code = $argv[2];
+} elseif($argv[1] == "file") {
+    $code = file_get_contents($argv[2]);
 }
 $parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
 
