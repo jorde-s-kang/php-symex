@@ -24,7 +24,6 @@ def evalExpression(exp: Dict, env: Environment):
         e = exp
     except TypeError:
         return None
-    # print(e)
     fn = match(e["nodeType"],
                re.compile("^Expr_BinaryOp_.*"), lambda x: binop,
                re.compile("^Scalar_.*"),        lambda x: parseValue,
@@ -37,7 +36,8 @@ def evalExpression(exp: Dict, env: Environment):
                "Expr_MethodCall",               lambda x: methodCall,
                None,                            lambda x: lambda x, y: None,
                "Expr_PropertyFetch",            lambda x: propertyFetch,
-               "Expr_Include",                  lambda x: lambda x,y: None)
+               "Expr_Include",                  lambda x: lambda x,y: None,
+               "Expr_Isset",                    lambda x: isset)
     return fn(e, env)
 
 
@@ -48,7 +48,7 @@ def funcCall(ast: Dict, env: Environment):
     :param env: The environment the expression will be called in
     """
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
-    fn = lambda x, y: None
+    fn = lambda *args, env=None: False
     try:
         fn = func.phpFunctions[ast["name"]["parts"][0]]
     except KeyError:
@@ -183,3 +183,17 @@ def propertyFetch(ast, env):
     """
     obj = evalExpression(ast["var"], env)
     return getattr(obj, ast["name"]["name"])
+
+def isset(ast, env):
+    """
+    Check if a variable is set in the current environment
+    :param ast: The abstract syntax tree of an isset expression
+    :param env: The environment the expression will be called in
+    """
+    try:
+        var = evalExpression(ast["vars"][0], env)
+        return True
+    except TypeError:
+        return False
+    except KeyError:
+        return False

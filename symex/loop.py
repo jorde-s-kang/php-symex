@@ -7,9 +7,9 @@ import symex.expression as expr
 
 def evalWhile(ast: Dict, env: Environment):
     en = Environment(env)
-    s = Solver()
+    so = Solver()
     c = ast["cond"]
-    so.add(expr.evalExpression(c, so, env))
+    so.add(expr.evalExpression(c, env))
     while so.check() == sat:
         print(so)
         e.phpEvalAst(ast["stmts"], en)

@@ -1,7 +1,7 @@
 from z3 import ExprRef
 from .Environment import Environment
 from pampy import match
-from phpparser import Parser
+import phpparser as p
 from z3 import Solver
 from typing import List, Dict
 
@@ -21,13 +21,12 @@ def phpEvalInline(data: str, getVars: Dict = {}, postVars: Dict = {}, constraint
 
     :returns: The resulting state of the program
     """
-    p = Parser()
     env = Environment()
     env.define("_GET", getVars)
     env.define("_POST", postVars)    
     for c in constraints:
         env.symenv.constraints.append(c)
-    ast = p.parse_inline(data)
+    ast = p.parseInline(data)
     return phpEvalAst(ast, env)
 
 
@@ -42,7 +41,6 @@ def phpEvalFile(fname: str, getVars: Dict = {}, postVars: Dict = {}, constraints
 
     :returns: The resulting state of the program
     """
-    p: Parser = Parser()
     env: Environment = Environment()
     env.define("_GET", getVars)
     env.define("_POST", postVars)
@@ -80,7 +78,9 @@ def phpEval(ast: Dict, env: Environment) -> ExprRef:
                {'nodeType': 'Stmt_For'},        lambda x: loop.evalFor,
                {'nodeType': 'Stmt_Foreach'},    lambda x: loop.evalForEach,
                {'nodeType': 'Stmt_Function'},   lambda x: func.define,
-               {'nodeType': 'Stmt_Class'},      lambda x: obj.genClass)
+               {'nodeType': 'Stmt_Class'},      lambda x: obj.genClass,
+               {'nodeType': 'Stmt_Nop'},        lambda x: lambda x,y: None,
+               {'nodeType': 'Stmt_InlineHTML'}, lambda x: lambda x,y: None)
     return fn(ast, env)
 
 

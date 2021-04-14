@@ -2,10 +2,11 @@ import z3
 import symex.expression as exp
 import symex.evaluation as e
 from symex.Environment import Environment
-import symex.PDO as pdo
 import symex.stdlib.encoding as encoding
 import symex.stdlib.mysql as mysql
 import symex.stdlib.varfuns as varfuns
+import symex.stdlib.PDO as pdo
+import symex.stdlib.mysqli as mysqli
 phpFunctions = {}
 escapedStrings = list()
 
@@ -61,10 +62,11 @@ addBuiltIn("mysql_connect", mysql.MysqlConnection)
 
 # Database object interfaces
 addConstructor("PDO", pdo.PhpPDO)
+addConstructor("mysqli", mysqli.PhpMysqli)
 
 # Variable functions
 addBuiltIn("gettype", varfuns.varType)
-addBuiltIn("isset",  varfuns.isset)
+addBuiltIn("isset",  varfuns.phpisset)
 addBuiltIn("is_int", varfuns.phpIsInt)
 addBuiltIn("is_integer", varfuns.phpIsInt)
 addBuiltIn("is_long", varfuns.phpIsInt)
