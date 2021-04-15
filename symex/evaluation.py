@@ -44,7 +44,7 @@ def phpEvalFile(fname: str, getVars: Dict = {}, postVars: Dict = {}, constraints
     env: Environment = Environment()
     env.define("_GET", getVars)
     env.define("_POST", postVars)
-    ast: List = p.parse_file(fname)
+    ast: List = p.parseFile(fname)
     return phpEvalAst(ast, env)
 
 

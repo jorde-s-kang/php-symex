@@ -48,7 +48,7 @@ def funcCall(ast: Dict, env: Environment):
     :param env: The environment the expression will be called in
     """
     args: List = [evalExpression(arg["value"], env) for arg in ast["args"]]
-    fn = lambda *args, env=None: False
+    fn = func.PhpFunction(ast["name"]["parts"][0], env, mode=2)
     try:
         fn = func.phpFunctions[ast["name"]["parts"][0]]
     except KeyError:
