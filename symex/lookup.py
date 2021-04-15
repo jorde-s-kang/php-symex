@@ -24,7 +24,7 @@ def get_binop(op: str) -> Callable:
             "LogicalOr": Or,
             "LogicalAnd": And,
             "LogicalXor": Xor,
-            "Concat": lambda a, b: a + b,
+            "Concat": phpConcat,
             "Plus": lambda a, b: a + b,
             "Minus": lambda a, b: a - b,
             "Mul": lambda a, b: a * b,
@@ -36,4 +36,13 @@ def get_binop(op: str) -> Callable:
             "SmallerOrEqual": lambda a, b: a <= b,
             "Greater": lambda a, b: a > b,
             "GreaterOrEqual": lambda a, b: a > b}
-    return dict[op[14:]]
+    return(dict[op[14:]])
+
+def phpConcat(a, b):
+    if type(a) == list:
+        a.append(b)
+        return a
+    else:
+        out = [a]
+        out.append(b)
+        return out
