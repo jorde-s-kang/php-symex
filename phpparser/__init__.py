@@ -1,3 +1,4 @@
+import re
 import subprocess
 import json
 from typing import List
@@ -16,7 +17,6 @@ import os
 #         time.sleep(1)
     
 #     def __req__(self, command: str, data: str) -> str:
-#         r: Response = get(f"http://localhost:{self.port}/parser.php",
 #                           params={"mode": command,
 #                                   "data": data})
 #         return r.text
@@ -49,7 +49,8 @@ def parse(*args):
     if(out[0] != "["):
         raise ParseError(str(stdout)[2:])
     else:
-        return json.loads(out)
+        
+        return json.loads(out.replace("\\", "\\\\"))
     
 def parseInline(string):
     return parse("inline", string)
