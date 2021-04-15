@@ -49,8 +49,7 @@ def parse(*args):
     if(out[0] != "["):
         raise ParseError(str(stdout)[2:])
     else:
-        
-        return json.loads(out.replace("\\", "\\\\"))
+        return json.loads(out.replace("\\", "\\\\").replace("\\\"", "\\\\\""))
     
 def parseInline(string):
     return parse("inline", string)
