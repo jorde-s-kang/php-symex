@@ -9,6 +9,7 @@ import symex.stdlib.mysql as mysql
 import symex.stdlib.varfuns as varfuns
 import symex.stdlib.PDO as pdo
 import symex.stdlib.mysqli as mysqli
+from symex.UnknownVal import UnknownVal
 phpFunctions = {}
 escapedStrings = list()
 
@@ -46,6 +47,8 @@ class PhpFunction:
                 else:
                     cmd += str(arg)
                 cmd += ","
+        else:
+            return UnknownVal()
                 
             cmd += ");"
             # print(cmd)
