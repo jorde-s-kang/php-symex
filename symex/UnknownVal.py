@@ -30,4 +30,7 @@ class UnknownVal:
 
     def __and__(self, a):
         return self.getVal(a) and a
+
+    def __getitem__(self, a):
+        return UnknownVal()
     

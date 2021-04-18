@@ -1,5 +1,6 @@
 import copy
 from symex.SymbolicEnvironment import SymbolicEnvironment
+from symex.UnknownVal import UnknownVal
 
 class Environment:
     def __init__(self, p=None):
@@ -7,6 +8,11 @@ class Environment:
         self.parent = p
         self.symenv = SymbolicEnvironment(self)
         self.escapedStrings = []
+        if self.parent is None:
+                self.define("_COOKIE", UnknownVal())
+                self.define("_SERVER", UnknownVal())
+                self.define("_SESSION", UnknownVal())
+
 
     def __str__(self):
         return f"{self.env}\n{self.symenv}"
