@@ -5,6 +5,7 @@ import phpparser as p
 from z3 import Solver
 from typing import List, Dict
 
+from symex.UnknownVal import UnknownVal
 import symex.expression as expr
 import symex.cond as cond
 import symex.loop as loop
@@ -14,12 +15,14 @@ import symex.obj as obj
 def phpEvalInline(data: str, getVars: Dict = {}, postVars: Dict = {}, constraints = []) -> Environment:
     """
     Evaluates a given inline PHP statement
-    :param data: A PHP string beginning '<?php'
-    :param getVars: Bind _GET superglobal variables.
-    :param postVars: Bind _POST superglobal variables.
-    :param constraints: A list of constraints on symbolic values in getVars and postVars
+    Args:
+        data: A PHP string beginning '<?php'
+        getVars: Bind _GET superglobal variables.
+        postVars: Bind _POST superglobal variables.
+        constraints: A list of constraints on symbolic values in getVars and postVars
 
-    :returns: The resulting state of the program
+    Returns:
+        Environment: The resulting state of the program
     """
     env = Environment()
     env.define("_GET", getVars)
@@ -33,13 +36,14 @@ def phpEvalInline(data: str, getVars: Dict = {}, postVars: Dict = {}, constraint
 def phpEvalFile(fname: str, getVars: Dict = {}, postVars: Dict = {}, constraints = []):
     """
     Evaluates a given PHP file
-    Parameters:
-    fname: The name of the file
-    :param getVars: Bind _GET superglobal variables.
-    :param postVars: Bind _POST superglobal variables.
-    :param constraints: A list of constraints on symbolic values in getVars and postVars
+    Args:
+        fname: The name of the file
+        getVars: Bind _GET superglobal variables.
+        postVars: Bind _POST superglobal variables.
+        constraints: A list of constraints on symbolic values in getVars and postVars
 
-    :returns: The resulting state of the program
+    Returns:
+        Environment: The resulting state of the program
     """
     env: Environment = Environment()
     env.define("_GET", getVars)
@@ -51,10 +55,11 @@ def phpEvalFile(fname: str, getVars: Dict = {}, postVars: Dict = {}, constraints
 def phpEvalAst(ast: List[Dict], env: Environment):
     """
     Evaluates the output of Phpparser.parse()
-    :param ast: A JSON formatted Abstract Syntax Tree
-    :param env: A state of a program
-
-    :returns: The resulting state of the program
+    Args:
+        ast: A JSON formatted Abstract Syntax Tree
+        env: A state of a program
+    Returns:
+        The resulting state of the program
     """
     for stmt in ast:
         phpEval(stmt, env)
@@ -63,11 +68,15 @@ def phpEvalAst(ast: List[Dict], env: Environment):
 
 def phpEval(ast: Dict, env: Environment) -> ExprRef:
     """
-    :param ast: A JSON formatted Abstract Syntax Tree
-    :param env: A state of a program
-
-    :returns: The resulting state of the program
+    Evaluates a JSON AST node
+    Args:
+        ast: A JSON formatted Abstract Syntax Tree
+        env: A state of a program
+    Returns:
+         The result of the node
     """
+    line = ast["attributes"]["startLine"]
+    print(f"Running {ast['nodeType']} at line {line}.")
     fn = match(ast,
                {'nodeType': 'Stmt_Expression'}, lambda x: expr.evalExpression,
                {'nodeType': 'Stmt_Echo'},       lambda x: phpEvalEcho,
@@ -87,6 +96,9 @@ def phpEval(ast: Dict, env: Environment) -> ExprRef:
 def phpEvalEcho(ast: Dict, env: Environment):
     """
     Evaluates a list of expressions and prints them to the screen.
+    Args:
+        ast: A JSON formatted Abstract Syntax Tree
+        env: A state of a program
     """
     exprs = [expr.evalExpression(ast, env) for ast in ast["exprs"]]
     print(*exprs)

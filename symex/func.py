@@ -36,7 +36,6 @@ class PhpFunction:
         scalars = True
         for a in args:
             scalars = type(a) in [int, str, float, bool]
-        print(str(scalars))
         if scalars:
             cmd = f"echo {self.name}("
             for arg in args[1:]:
